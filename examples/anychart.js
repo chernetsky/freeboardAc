@@ -1,11 +1,10 @@
 (function() {
   var acGlobal;
 
-
   freeboard.loadWidgetPlugin({
     "type_name": "anychart_freeboard_plugin",
 
-    "display_name": "Anychart Freeboard",
+    "display_name": "Anychart",
 
     "description": "AnyChart -- <strong>best charting solutions!</strong>",
 
@@ -15,6 +14,12 @@
 
     "fill_size": true,
     "settings": [
+      {
+        "name": "data_source",
+        "display_name": "Data source",
+        "type": "calculated",
+        "multi_input": true
+      },
       {
         "name": "type",
         "display_name": "Chart type",
@@ -68,14 +73,16 @@
 
   var anychartWidget = function(settings) {
     var self = this;
-    var chart;
     var container;
+    var chart;
+    var dataSet = acGlobal.data.set();
+
     var currentSettings = settings;
 
     self.render = function(containerElement) {
       if (!chart) {
         container = containerElement;
-        chart = acGlobal[currentSettings.type]([1, 4, 6, 3]);
+        chart = acGlobal[currentSettings.type](dataSet);
         chart.container(containerElement);
         chart.draw();
       }
@@ -92,17 +99,27 @@
       currentSettings = newSettings;
 
       if (newSettings.type !== oldType && chart) {
-        console.log("chart.dispose()");
+        console.log("chart.dispose() 1");
         chart.dispose();
         chart = null;
         self.render(container);
       }
     };
 
+    self.onCalculatedValueChanged = function(settingName, newValue) {
+      // Remember we defined "the_text" up above in our settings.
+      console.log(settingName, "changed");
+      if (settingName === "data_source") {
+        console.log(newValue);
+        dataSet.append(newValue)
+      }
+    };
 
     self.onDispose = function() {
-      if (chart)
+      if (chart) {
+        console.log("chart.dispose() 2");
         chart.dispose();
+      }
     };
   }
 }());

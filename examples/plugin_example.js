@@ -46,7 +46,8 @@
       {
         "name": "last_name",
         "display_name": "Last Name",
-        // **type "calculated"** : This is a special text input box that may contain javascript formulas and references to datasources in the freeboard.
+        // **type "calculated"** :
+        // This is a special text input box that may contain javascript formulas and references to datasources in the freeboard.
         "type": "calculated"
       },
       {
@@ -107,10 +108,19 @@
         "default_value": 5000
       }
     ],
-    // **newInstance(settings, newInstanceCallback, updateCallback)** (required) : A function that will be called when a new instance of this plugin is requested.
-    // * **settings** : A javascript object with the initial settings set by the user. The names of the properties in the object will correspond to the setting names defined above.
-    // * **newInstanceCallback** : A callback function that you'll call when the new instance of the plugin is ready. This function expects a single argument, which is the new instance of your plugin object.
-    // * **updateCallback** : A callback function that you'll call if and when your datasource has an update for freeboard to recalculate. This function expects a single parameter which is a javascript object with the new, updated data. You should hold on to this reference and call it when needed.
+    // **newInstance(settings, newInstanceCallback, updateCallback)** (required) :
+    // A function that will be called when a new instance of this plugin is requested.
+    //
+    // **settings** :
+    // javascript object with the initial settings set by the user.
+    // The names of the properties in the object will correspond to the setting names defined above.
+    //
+    // **newInstanceCallback** :
+    // A callback function that you'll call when the new instance of the plugin is ready.
+    // This function expects a single argument, which is the new instance of your plugin object.
+    //
+    // **updateCallback** :
+    // A callback function that you'll call if and when your datasource has an update for freeboard to recalculate. This function expects a single parameter which is a javascript object with the new, updated data. You should hold on to this reference and call it when needed.
     newInstance: function(settings, newInstanceCallback, updateCallback) {
       // myDatasourcePlugin is defined below.
       newInstanceCallback(new myDatasourcePlugin(settings, updateCallback));
@@ -184,7 +194,8 @@
   // ### Widget Definition
   //
   // -------------------
-  // **freeboard.loadWidgetPlugin(definition)** tells freeboard that we are giving it a widget plugin. It expects an object with the following:
+  // **freeboard.loadWidgetPlugin(definition)** tells freeboard that we are giving it a widget plugin.
+  // It expects an object with the following:
   freeboard.loadWidgetPlugin({
     // Same stuff here as with datasource plugin.
     "type_name": "my_widget_plugin",
@@ -237,15 +248,23 @@
     // Here we create an element to hold the text we're going to display. We're going to set the value displayed in it below.
     var myTextElement = $("<span></span>");
 
-    // **render(containerElement)** (required) : A public function we must implement that will be called when freeboard wants us to render the contents of our widget. The container element is the DIV that will surround the widget.
+    // **render(containerElement)** (required) :
+    // A public function we must implement that will be called when freeboard wants us to render the contents of our widget.
+    // The container element is the DIV that will surround the widget.
     self.render = function(containerElement) {
       // Here we append our text element to the widget container element.
       $(containerElement).append(myTextElement);
-    }
+    };
 
-    // **getHeight()** (required) : A public function we must implement that will be called when freeboard wants to know how big we expect to be when we render, and returns a height. This function will be called any time a user updates their settings (including the first time they create the widget).
+    // **getHeight()** (required) :
+    // A public function we must implement that will be called when freeboard wants to know
+    // how big we expect to be when we render,
+    // and returns a height. This function will be called any time a user updates their settings
+    // (including the first time they create the widget).
     //
-    // Note here that the height is not in pixels, but in blocks. A block in freeboard is currently defined as a rectangle that is fixed at 300 pixels wide and around 45 pixels multiplied by the value you return here.
+    // Note here that the height is not in pixels, but in blocks.
+    // A block in freeboard is currently defined as a rectangle that is fixed at 300 pixels wide and around 45 pixels
+    // multiplied by the value you return here.
     //
     // Blocks of different sizes may be supported in the future.
     self.getHeight = function() {
@@ -255,22 +274,25 @@
       else {
         return 1;
       }
-    }
+    };
 
-    // **onSettingsChanged(newSettings)** (required) : A public function we must implement that will be called when a user makes a change to the settings.
+    // **onSettingsChanged(newSettings)** (required) :
+    // A public function we must implement that will be called when a user makes a change to the settings.
     self.onSettingsChanged = function(newSettings) {
       // Normally we'd update our text element with the value we defined in the user settings above (the_text), but there is a special case for settings that are of type **"calculated"** -- see below.
       currentSettings = newSettings;
-    }
+    };
 
-    // **onCalculatedValueChanged(settingName, newValue)** (required) : A public function we must implement that will be called when a calculated value changes. Since calculated values can change at any time (like when a datasource is updated) we handle them in a special callback function here.
+    // **onCalculatedValueChanged(settingName, newValue)** (required) :
+    // A public function we must implement that will be called when a calculated value changes.
+    // Since calculated values can change at any time (like when a datasource is updated) we handle them in a special callback function here.
     self.onCalculatedValueChanged = function(settingName, newValue) {
       // Remember we defined "the_text" up above in our settings.
       if (settingName == "the_text") {
         // Here we do the actual update of the value that's displayed in on the screen.
         $(myTextElement).html(newValue);
       }
-    }
+    };
 
     // **onDispose()** (required) : Same as with datasource plugins.
     self.onDispose = function() {
