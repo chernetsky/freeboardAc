@@ -37,7 +37,9 @@ window.dyngaugeID = 0;
     }
 
     this.onSettingsChanged = function(newSettings) {
-      if (newSettings.min_value != currentSettings.min_value || newSettings.max_value != currentSettings.max_value || newSettings.units != currentSettings.units) {
+      if (newSettings.min_value != currentSettings.min_value ||
+          newSettings.max_value != currentSettings.max_value ||
+          newSettings.units != currentSettings.units) {
         currentSettings = newSettings;
         createGauge();
       }
