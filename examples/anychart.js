@@ -22,28 +22,16 @@
         default_value: [[1, 0, 3, 6, 10]]
       },
       {
-        name: 'type',
-        display_name: 'Chart type',
-        type: 'option',
-        options: [
-          {
-            name: 'line',
-            value: 'line'
-          },
-          {
-            name: 'column',
-            value: 'column'
-          },
-          {
-            name: 'pie',
-            value: 'pie'
-          }
-        ]
+        name: 'max_points',
+        display_name: 'Maximum points',
+        type: 'number',
+        default_value: 5
       },
       {
         name: 'size',
         display_name: 'Size',
         type: 'option',
+        default_value: 4,
         options: [
           {
             name: '2',
@@ -63,6 +51,7 @@
           }
         ]
       },
+
       {
         name: 'run_editor',
         display_name: 'Run editor',
@@ -88,21 +77,67 @@
     var dataSet = acGlobal.data.set();
     var currentSettings = settings;
     var editorComplete = false;
-    // var editorWrapper = $('<div id="editor-wrapper" style="z-index: 1000;"></div>');
 
-    self.runEditor = function(){
+    self.render = function(element) {
+      if (code) {
+        self.drawChart();
+      } else {
+        container = element;
+      }
+    };
+
+    self.drawChart = function () {
+      if (chart)
+        chart.dispose();
+
+      var codeSplit = code.split(/\/\*=rawData.+rawData=\*\//);
+      if (codeSplit.length === 2) {
+        // Chart creation code part
+        var code1 = '(function(){' + codeSplit[0] + 'return chart;})();';
+
+        // Data apply and chart settings code part
+        var code2 = '(function(){ return function(chart, dataSet){' + codeSplit[1] + '}})();';
+
+        // Create chart instance
+        chart = eval(code1);
+
+        if (!chart) return null;
+
+        // Invoke second part of code: pass data and apply chart appearance settings
+        var code2func = eval(code2);
+        code2func.apply(null, [chart, dataSet]);
+
+        chart['container'](container);
+        chart['draw']();
+      }
+    };
+
+    self.onCalculatedValueChanged = function(settingName, newValue) {
+      //console.log("onCalculatedValueChanged", settingName, newValue);
+      switch (settingName) {
+        case 'data_source': {
+          dataSet.append(newValue);
+          if (dataSet.getRowsCount() > currentSettings.max_points)
+            dataSet.remove(0);
+
+          if (!code) {
+            self.runEditor();
+            currentSettings.run_editor = false;
+          }
+          break;
+        }
+      }
+    };
+
+    self.runEditor = function() {
       if (!editor) {
-        editor = new acGlobal['chartEditor'];
+        editor = new acGlobal['basicEditor'];
         editor.step('data', false);
         editor.step('export', false);
-        editor.data([
-          {'x': 'Hello', 'value': 10},
-          {'x': 'Freeboard', 'value': 20},
-          {'x': 'World', 'value': 15}
-        ]);
+        editor.data({data: dataSet});
         editor.dialogRender();
 
-        editor.listenOnce('editorComplete', function() {
+        editor.listen('editorComplete', function() {
           editorComplete = true;
 
           // Get from editor javascript code that creates configured chart
@@ -129,76 +164,33 @@
     };
 
     self.closeEditor = function(opt_code){
+      // console.log("closeEditor", opt_code);
       if (opt_code)
         self.render(container);
     };
 
-    self.render = function(element) {
-      if (!code) {
-        container = element;
+    self.onSettingsChanged = function(newSettings) {
+      if (newSettings.run_editor) {
         self.runEditor();
+        newSettings.run_editor = false;
       } else {
-        self.drawChart();
-      }
-    };
-
-    self.drawChart = function () {
-      if (chart) {
-        chart.dispose();
+        self.render(container);
       }
 
-      var codeSplit = code.split(/\/\*=rawData.+rawData=\*\//);
-      if (codeSplit.length === 2) {
-        // Chart creation code part
-        var code1 = '(function(){' + codeSplit[0] + 'return chart;})();';
-
-        // Data apply and chart settings code part
-        var code2 = '(function(){ return function(chart, rawData){' + codeSplit[1] + '}})();';
-        console.log(code1, code2);
-
-        // Create chart instance
-        chart = eval(code1);
-
-        if (!chart) return null;
-
-        // Invoke second part of code: pass data and apply chart appearance settings
-        var code2func = eval(code2);
-        code2func.apply(null, [chart, dataSet.data()]);
-
-        // todo: DEBUG
-        // chart.data(dataSet);
-
-        chart['container'](container);
-        chart['draw']();
+      if (currentSettings.max_points !== newSettings.max_points) {
+        newSettings.max_points = newSettings.max_points > 0 ? newSettings.max_points : currentSettings.max_points;
+        var rowsToRemove = dataSet.getRowsCount() - newSettings.max_points;
+        for (; rowsToRemove > 0; rowsToRemove--) {
+          dataSet.remove(0);
+        }
       }
+
+      currentSettings = newSettings;
     };
 
     self.getHeight = function() {
       var size = Number(currentSettings.size);
       return !isNaN(size) ? size : 2;
-    };
-
-    self.onSettingsChanged = function(newSettings) {
-      console.log("onSettingsChanged", newSettings);
-      currentSettings = newSettings;
-
-      if (currentSettings.run_editor) {
-        self.runEditor();
-        currentSettings.run_editor = false;
-        dataSet.append(currentSettings.data_source);
-      } else {
-        self.render(container);
-      }
-    };
-
-    self.onCalculatedValueChanged = function(settingName, newValue) {
-      switch (settingName) {
-        case 'data_source':
-          dataSet.append(newValue);
-          break;
-        case 'mapping':
-          break;
-      }
     };
 
     self.onDispose = function() {
