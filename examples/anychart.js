@@ -4,7 +4,7 @@
   freeboard.loadWidgetPlugin({
     type_name: 'anychart_freeboard_plugin',
     display_name: 'Anychart',
-    description: 'AnyChart -- <strong>best charting solutions!</strong>',
+    description: '<strong>AnyChart</strong> -- best charting solutions!',
     external_scripts: [
       'https://cdn.anychart.com/releases/8.5.0/js/anychart-bundle.min.js',
       'plugins/thirdparty/anychart-editor.min.js',
@@ -51,13 +51,17 @@
           }
         ]
       },
-
       {
         name: 'run_editor',
         display_name: 'Run editor',
         type: 'boolean',
         default_value: true,
         description: 'Run chart editor after close this dialog'
+      },
+      {
+        name: 'chart_code',
+        display_name: 'Chart code',
+        type: 'calculated'
       }
     ],
 
@@ -67,30 +71,26 @@
     }
   });
 
-
   var anychartWidget = function(settings) {
     var self = this;
     var container;
     var editor;
     var chart;
-    var code;
     var dataSet = acGlobal.data.set();
     var currentSettings = settings;
     var editorComplete = false;
 
     self.render = function(element) {
-      if (code) {
+      container = element;
+      if (currentSettings.chart_code)
         self.drawChart();
-      } else {
-        container = element;
-      }
     };
 
     self.drawChart = function () {
       if (chart)
         chart.dispose();
 
-      var codeSplit = code.split(/\/\*=rawData.+rawData=\*\//);
+      var codeSplit = currentSettings.chart_code.split(/\/\*=rawData.+rawData=\*\//);
       if (codeSplit.length === 2) {
         // Chart creation code part
         var code1 = '(function(){' + codeSplit[0] + 'return chart;})();';
@@ -120,7 +120,7 @@
           if (dataSet.getRowsCount() > currentSettings.max_points)
             dataSet.remove(0);
 
-          if (!code) {
+          if (!currentSettings.chart_code) {
             self.runEditor();
             currentSettings.run_editor = false;
           }
@@ -131,7 +131,7 @@
 
     self.runEditor = function() {
       if (!editor) {
-        editor = new acGlobal['basicEditor'];
+        editor = new acGlobal['chartEditor'];
         editor.step('data', false);
         editor.step('export', false);
         editor.data({data: dataSet});
@@ -141,7 +141,7 @@
           editorComplete = true;
 
           // Get from editor javascript code that creates configured chart
-          code = editor['getJavascript']({
+          currentSettings.chart_code = editor['getJavascript']({
             'minify': true,
             'addData': false,
             'addMarkers': true,
@@ -149,13 +149,12 @@
             'container': ''
           });
 
-          // Save code and close editor dialog
-          self.closeEditor(code);
+          self.closeEditor(true);
         });
 
         editor.listen('close', function(evt) {
           if (!editorComplete && evt.target === editor)
-            self.closeEditor(null);
+            self.closeEditor(false);
         });
       }
 
@@ -163,13 +162,18 @@
       editor.dialogVisible(true);
     };
 
-    self.closeEditor = function(opt_code){
-      // console.log("closeEditor", opt_code);
-      if (opt_code)
+    self.closeEditor = function(update){
+      editor.dispose();
+      editor = null;
+
+      if (update)
         self.render(container);
     };
 
     self.onSettingsChanged = function(newSettings) {
+      var previousSettings = Object.assign(currentSettings);
+      currentSettings = newSettings;
+
       if (newSettings.run_editor) {
         self.runEditor();
         newSettings.run_editor = false;
@@ -177,15 +181,13 @@
         self.render(container);
       }
 
-      if (currentSettings.max_points !== newSettings.max_points) {
-        newSettings.max_points = newSettings.max_points > 0 ? newSettings.max_points : currentSettings.max_points;
+      if (previousSettings.max_points !== newSettings.max_points) {
+        newSettings.max_points = newSettings.max_points > 0 ? newSettings.max_points : previousSettings.max_points;
         var rowsToRemove = dataSet.getRowsCount() - newSettings.max_points;
         for (; rowsToRemove > 0; rowsToRemove--) {
           dataSet.remove(0);
         }
       }
-
-      currentSettings = newSettings;
     };
 
     self.getHeight = function() {
