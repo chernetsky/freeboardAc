@@ -7,8 +7,8 @@
     description: '<strong>AnyChart</strong> -- best charting solutions!',
     external_scripts: [
       'https://cdn.anychart.com/releases/8.5.0/js/anychart-bundle.min.js',
-      'plugins/thirdparty/anychart-editor.min.js',
-      'plugins/thirdparty/anychart-editor.min.css'
+      'http://static.anychart.com/demos/editor/anychart-editor.min.js',
+      'http://static.anychart.com/demos/editor/anychart-editor.min.css'
     ],
 
     fill_size: true,
@@ -18,14 +18,13 @@
         display_name: 'Data source',
         type: 'calculated',
         multi_input: true,
-        required: true,
-        default_value: [[1, 0, 3, 6, 10]]
+        required: true
       },
       {
         name: 'max_points',
         display_name: 'Maximum points',
         type: 'number',
-        default_value: 5
+        default_value: 100
       },
       {
         name: 'size',
@@ -44,10 +43,6 @@
           {
             name: '4',
             value: 4
-          },
-          {
-            name: '5',
-            value: 5
           }
         ]
       },
@@ -58,10 +53,18 @@
         default_value: true,
         description: 'Run chart editor after close this dialog'
       },
+      // These fields better to be hidden
       {
         name: 'chart_code',
         display_name: 'Chart code',
-        type: 'calculated'
+        type: 'text',
+        description: "This field is for widget's internal using purpose"
+      },
+      {
+        name: 'editor_model',
+        display_name: 'Editor model',
+        type: 'text',
+        description: "This field is for widget's internal using purpose"
       }
     ],
 
@@ -73,12 +76,17 @@
 
   var anychartWidget = function(settings) {
     var self = this;
+    var currentSettings = settings;
     var container;
-    var editor;
+
     var chart;
     var dataSet = acGlobal.data.set();
-    var currentSettings = settings;
-    var editorComplete = false;
+
+    var editor;
+    var editorOptions = {
+      run: true,
+      complete: false
+    };
 
     self.render = function(element) {
       container = element;
@@ -86,7 +94,7 @@
         self.drawChart();
     };
 
-    self.drawChart = function () {
+    self.drawChart = function() {
       if (chart)
         chart.dispose();
 
@@ -112,35 +120,17 @@
       }
     };
 
-    self.onCalculatedValueChanged = function(settingName, newValue) {
-      //console.log("onCalculatedValueChanged", settingName, newValue);
-      switch (settingName) {
-        case 'data_source': {
-          dataSet.append(newValue);
-          if (dataSet.getRowsCount() > currentSettings.max_points)
-            dataSet.remove(0);
-
-          if (!currentSettings.chart_code) {
-            self.runEditor();
-            currentSettings.run_editor = false;
-          }
-          break;
-        }
-      }
-    };
-
     self.runEditor = function() {
       if (!editor) {
+        editorOptions.run = false;
         editor = new acGlobal['chartEditor'];
+        editor.deserializeModel(currentSettings.editor_model);
         editor.step('data', false);
         editor.step('export', false);
         editor.data({data: dataSet});
-        editor.dialogRender();
 
         editor.listen('editorComplete', function() {
-          editorComplete = true;
-
-          // Get from editor javascript code that creates configured chart
+          // Get javascript code that creates configured chart
           currentSettings.chart_code = editor['getJavascript']({
             'minify': true,
             'addData': false,
@@ -149,25 +139,45 @@
             'container': ''
           });
 
-          self.closeEditor(true);
+          editorOptions.complete = true;
+          self.closeEditor();
         });
 
         editor.listen('close', function(evt) {
-          if (!editorComplete && evt.target === editor)
-            self.closeEditor(false);
+          if (!editorOptions.complete && evt.target === editor)
+            self.closeEditor();
         });
       }
 
-      editorComplete = false;
+      editorOptions.complete = false;
+      editor.dialogRender();
       editor.dialogVisible(true);
     };
 
-    self.closeEditor = function(update){
+    self.closeEditor = function() {
+      currentSettings.editor_model = editor.serializeModel();
       editor.dispose();
+      editor.removeAllListeners();
       editor = null;
 
-      if (update)
-        self.render(container);
+      if (editorOptions.complete)
+        self.drawChart();
+    };
+
+    self.onCalculatedValueChanged = function(settingName, newValue) {
+      switch (settingName) {
+        case 'data_source': {
+          dataSet.append(newValue);
+          if (dataSet.getRowsCount() > currentSettings.max_points)
+            dataSet.remove(0);
+
+          if (editorOptions.run) {
+            self.runEditor();
+            currentSettings.run_editor = false;
+          }
+          break;
+        }
+      }
     };
 
     self.onSettingsChanged = function(newSettings) {
@@ -175,7 +185,7 @@
       currentSettings = newSettings;
 
       if (newSettings.run_editor) {
-        self.runEditor();
+        editorOptions.run = true;
         newSettings.run_editor = false;
       } else {
         self.render(container);
