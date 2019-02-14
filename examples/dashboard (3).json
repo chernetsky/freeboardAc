@@ -1,0 +1,51 @@
+{
+	"version": 1,
+	"allow_edit": true,
+	"plugins": [],
+	"panes": [
+		{
+			"width": 1,
+			"row": {
+				"3": 1
+			},
+			"col": {
+				"3": 1
+			},
+			"col_width": 2,
+			"widgets": [
+				{
+					"type": "anychart_freeboard_plugin",
+					"settings": {
+						"data_source": [
+							"datasources[\"cl1\"][\"numeric_value\"]",
+							"datasources[\"000019b2af08\"][\"cpuT\"]",
+							"datasources[\"000019b2af08\"][\"memory\"]"
+						],
+						"max_points": 100,
+						"size": 4,
+						"run_editor": true,
+						"chart_code": "var chart=anychart.line();/*=rawData*/var dataSet=null;/*rawData=*/var mapping_0=dataSet.mapAs({\"x\":[\"0\"],\"value\":[\"1\"]});var mapping_1=dataSet.mapAs({\"x\":[\"0\"],\"value\":[\"2\"]});var series;series=chart.line(mapping_0);series.id(\"goog_1449549103\");series=chart.line(mapping_1);series.id(\"goog_1449549107\");var scale0=anychart.scales.linear();scale0.maximum(\"60\");scale0.softMinimum(\"55\");chart.getSeries('goog_1449549103').color(\"#ff0000\");/*=seriesNames*/chart.getSeries('goog_1449549103').name(\"CPU\");chart.getSeries('goog_1449549107').name(\"Memory\");chart.getSeries('goog_1449549103').yScale(scale0);/*seriesNames=*/chart.legend().enabled(true);chart.tooltip().title().enabled(false);chart.xAxis(0).enabled(false);chart.yAxis(0).enabled(true);chart.yAxis(1).enabled(true);chart.yAxis(1).orientation(\"right\");chart.yAxis(1).scale(scale0);",
+						"editor_model": "{\"dataSettings\":{\"active\":\"cgoog_1998149788\",\"field\":\"0\",\"mappings\":[[{\"ctor\":\"line\",\"mapping\":{\"value\":\"1\"},\"id\":\"goog_1449549103\"},{\"ctor\":\"line\",\"mapping\":{\"value\":\"2\"},\"id\":\"goog_1449549107\"}]]},\"anychart\":{},\"chart\":{\"type\":\"line\",\"seriesType\":\"line\",\"settings\":{\"getSeries('goog_1449549103').name()\":\"CPU\",\"xAxis(0).enabled()\":false,\"yAxis(0).enabled()\":true,\"getSeries('goog_1449549107').name()\":\"Memory\",\"yAxis(1).enabled()\":true,\"yAxis(1).orientation()\":\"right\",\"yAxis(1).scale()\":\"STANDALONE:scale:2\",\"getSeries('goog_1449549103').color()\":\"#ff0000\",\"getSeries('goog_1449549103').yScale()\":\"STANDALONE:scale:2\",\"legend().enabled()\":true,\"tooltip().title().enabled()\":false},\"typeKey\":\"line\"},\"editorSettings\":{\"lockSeriesName\":{\"getSeries('goog_1449549103').name()\":false,\"getSeries('goog_1449549107').name()\":false}},\"standalones\":{\"scale\":[{\"type\":\"ordinal\",\"key\":\"xScale()\",\"name\":\"Default X Scale\",\"instance\":null,\"locked\":false},{\"type\":\"linear\",\"key\":\"yScale()\",\"name\":\"Default Y Scale\",\"instance\":null,\"locked\":false},{\"name\":\"Lin20_60\",\"type\":\"linear\",\"instance\":null,\"settings\":{\"maximum()\":\"60\",\"softMinimum()\":\"55\"}}]}}"
+					}
+				}
+			]
+		}
+	],
+	"datasources": [
+		{
+			"name": "cl1",
+			"type": "clock",
+			"settings": {
+				"refresh": 2
+			}
+		},
+		{
+			"name": "000019b2af08",
+			"type": "dweet_io",
+			"settings": {
+				"thing_id": "000019b2af08"
+			}
+		}
+	],
+	"columns": 3
+}

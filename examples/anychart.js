@@ -1,6 +1,11 @@
 (function() {
   var acGlobal;
 
+  (function() {
+    freeboard.addStyle("#setting-row-chart_code", "display:none");
+    freeboard.addStyle("#setting-row-editor_model", "display:none");
+  })();
+
   freeboard.loadWidgetPlugin({
     type_name: 'anychart_freeboard_plugin',
     display_name: 'Anychart',
@@ -56,7 +61,7 @@
         default_value: true,
         description: 'Run chart editor after close this dialog'
       },
-      // These fields better to be hidden
+      // Hidden fields for widget inner purpose
       {
         name: 'chart_code',
         display_name: 'Chart code',
@@ -176,7 +181,6 @@
 
           if (editorOptions.run) {
             self.runEditor();
-            currentSettings.run_editor = false;
           }
           break;
         }
@@ -190,9 +194,8 @@
 
       if (newSettings.run_editor) {
         editorOptions.run = true;
-        newSettings.run_editor = false;
       } else {
-        self.render(container);
+        self.drawChart();
       }
 
       if (previousSettings.max_points !== newSettings.max_points) {
@@ -215,5 +218,5 @@
         dataSet.dispose();
       }
     };
-  }
+  };
 }());
