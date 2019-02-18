@@ -13,10 +13,10 @@
     external_scripts: [
       'https://cdn.anychart.com/releases/8.5.0/js/anychart-bundle.min.js',
       'https://cdn.anychart.com/releases/8.5.0/fonts/css/anychart-font.min.css',
-      'plugins/thirdparty/anychart-editor.min.js',
-      'plugins/thirdparty/anychart-editor.min.css'
-      // 'http://static.anychart.com/demos/editor/anychart-editor.min.js',
-      // 'http://static.anychart.com/demos/editor/anychart-editor.min.css'
+      // 'plugins/thirdparty/anychart-editor.min.js',
+      // 'plugins/thirdparty/anychart-editor.min.css'
+      'http://static.anychart.com/demos/editor/anychart-editor.min.js',
+      'http://static.anychart.com/demos/editor/anychart-editor.min.css'
     ],
 
     fill_size: true,
@@ -159,7 +159,7 @@
 
       editorOptions.complete = false;
       editor.dialogRender();
-      editor.dialogVisible(true);
+      editor.dialogVisible(true, 'anychart-ce-freeboard-dialog');
     };
 
     self.closeEditor = function() {
