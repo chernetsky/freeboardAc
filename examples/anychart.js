@@ -4,6 +4,7 @@
   (function() {
     freeboard.addStyle("#setting-row-chart_code", "display:none");
     freeboard.addStyle("#setting-row-editor_model", "display:none");
+    freeboard.addStyle("#setting-row-widget_id", "display:none");
   })();
 
   freeboard.loadWidgetPlugin({
@@ -71,6 +72,11 @@
       {
         name: 'editor_model',
         display_name: 'Editor model',
+        type: 'text',
+        description: "This field is for widget's internal using purpose"
+      },
+      {
+        name: 'widget_id',
         type: 'text',
         description: "This field is for widget's internal using purpose"
       }
@@ -147,6 +153,17 @@
             'container': ''
           });
 
+          currentSettings.editor_model = editor.serializeModel();
+
+          editor.saveToCloud(function(err, id){
+            if (id)
+              currentSettings.widget_id = id;
+          }, {
+            'id': currentSettings.widget_id || void 0,
+            'code': currentSettings.code,
+            'model': currentSettings.editor_model
+          });
+
           editorOptions.complete = true;
           self.closeEditor();
         });
@@ -163,7 +180,6 @@
     };
 
     self.closeEditor = function() {
-      currentSettings.editor_model = editor.serializeModel();
       editor.dispose();
       editor.removeAllListeners();
       editor = null;
