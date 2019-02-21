@@ -14,8 +14,8 @@
     external_scripts: [
       'https://cdn.anychart.com/releases/8.5.0/js/anychart-bundle.min.js',
       'https://cdn.anychart.com/releases/8.5.0/fonts/css/anychart-font.min.css',
-      // 'plugins/thirdparty/anychart-editor.min.js',
-      // 'plugins/thirdparty/anychart-editor.min.css'
+      //'plugins/thirdparty/anychart-editor.min.js',
+      //'plugins/thirdparty/anychart-editor.min.css'
       'http://static.anychart.com/demos/editor/anychart-editor.min.js',
       'http://static.anychart.com/demos/editor/anychart-editor.min.css'
     ],
@@ -172,11 +172,11 @@
           if (!editorOptions.complete && evt.target === editor)
             self.closeEditor();
         });
-      }
 
-      editorOptions.complete = false;
-      editor.dialogRender();
-      editor.dialogVisible(true, 'anychart-ce-freeboard-dialog');
+        editorOptions.complete = false;
+        editor.dialogRender();
+        editor.dialogVisible(true, 'anychart-ce-freeboard-dialog');
+      }
     };
 
     self.closeEditor = function() {
@@ -196,7 +196,10 @@
             dataSet.remove(0);
 
           if (editorOptions.run) {
-            self.runEditor();
+            if (freeboard.isEditing())
+              self.runEditor();
+            else
+              editorOptions.run = false;
           }
           break;
         }
