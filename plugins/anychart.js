@@ -4,7 +4,7 @@
   (function() {
     freeboard.addStyle("#setting-row-chart_code", "display:none");
     freeboard.addStyle("#setting-row-editor_model", "display:none");
-    // freeboard.addStyle("#setting-row-widget_id", "display:none");
+    freeboard.addStyle("#setting-row-widget_id", "display:none");
   })();
 
   freeboard.loadWidgetPlugin({
