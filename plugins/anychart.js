@@ -4,7 +4,7 @@
   (function() {
     freeboard.addStyle("#setting-row-chart_code", "display:none");
     freeboard.addStyle("#setting-row-editor_model", "display:none");
-    freeboard.addStyle("#setting-row-widget_id", "display:none");
+    // freeboard.addStyle("#setting-row-widget_id", "display:none");
   })();
 
   freeboard.loadWidgetPlugin({
@@ -98,7 +98,7 @@
 
     var editor;
     var editorOptions = {
-      run: true,
+      run: false,
       complete: false
     };
 
@@ -211,7 +211,7 @@
       var previousSettings = typeof currentSettings === 'object' ? Object.assign(currentSettings) : currentSettings;
       currentSettings = newSettings;
 
-      if (newSettings.run_editor) {
+      if (newSettings.run_editor && freeboard.isEditing()) {
         editorOptions.run = true;
       } else {
         self.drawChart();
