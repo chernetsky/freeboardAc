@@ -12,7 +12,7 @@
       // url: "",
       // logoSrc: "",
 
-      licenseKey: ""
+      licenseKey: "anychart-test-72196ea3-614396c4"
     },
 
     //localization: {
@@ -126,6 +126,11 @@
       if (acConfig.defaultTheme) {
         acGlobal.theme(acConfig.defaultTheme);
       }
+
+      if (acConfig.credits && acConfig.credits.licenseKey) {
+        acGlobal.licenseKey(acConfig.credits.licenseKey);
+      }
+
       newInstanceCallback(new anychartWidget(settings));
     }
   });
