@@ -1,4 +1,42 @@
 (function() {
+  /**
+   * Global options for all anychart products
+   */
+  var acConfig = {
+    credits: {
+      // You can customize following settings if you've provided valid license key.
+      // Otherwise they are ignored.
+
+      // enabled: true,
+      // text: "",
+      // url: "",
+      // logoSrc: "",
+
+      licenseKey: ""
+    },
+
+    //localization: {
+      // inputLocale: "",
+      // outputLocale: "",
+      // inputDateTimeFormat: "",
+      // outputDateFormat: "",
+      // outputDateTimeFormat: "",
+      // outputTimeFormat: "",
+      // outputTimezone: ""
+    //},
+
+
+    /**
+     * Default theme
+     *
+     * To use additional themes you should include appropriate theme scripts to dashboard.
+     * You can find all additional scripts here: https://www.anychart.com/download/cdn
+     *
+     * For example, to be able to use the 'darkBlue' theme, you should include this script: https://cdn.anychart.com/releases/8.5.0/themes/dark_blue.min.js
+     */
+     defaultTheme: "darkBlue"
+  };
+
   var acGlobal;
 
   (function() {
@@ -16,8 +54,8 @@
       'https://cdn.anychart.com/releases/8.5.0/fonts/css/anychart-font.min.css',
       //'plugins/thirdparty/anychart-editor.min.js',
       //'plugins/thirdparty/anychart-editor.min.css'
-      'http://static.anychart.com/demos/editor/anychart-editor.min.js',
-      'http://static.anychart.com/demos/editor/anychart-editor.min.css'
+      'https://static.anychart.com/demos/editor/anychart-editor.min.js',
+      'https://static.anychart.com/demos/editor/anychart-editor.min.css'
     ],
 
     fill_size: true,
@@ -84,6 +122,10 @@
 
     newInstance: function(settings, newInstanceCallback) {
       acGlobal = window['anychart'];
+
+      if (acConfig.defaultTheme) {
+        acGlobal.theme(acConfig.defaultTheme);
+      }
       newInstanceCallback(new anychartWidget(settings));
     }
   });
