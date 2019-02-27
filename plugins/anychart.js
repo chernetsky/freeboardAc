@@ -12,7 +12,7 @@
       // url: "",
       // logoSrc: "",
 
-      licenseKey: "anychart-test-72196ea3-614396c4"
+      licenseKey: ""
     },
 
     //localization: {
