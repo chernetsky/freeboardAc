@@ -1,30 +1,22 @@
 (function() {
   /**
-   * Global options for all anychart products
+   * Global options for all anychart widgets
    */
   var acConfig = {
-    credits: {
-      // You can customize following settings if you've provided valid license key.
-      // Otherwise they are ignored.
-
-      // enabled: true,
-      // text: "",
-      // url: "",
-      // logoSrc: "",
-
-      licenseKey: ""
-    },
-
-    //localization: {
-      // inputLocale: "",
-      // outputLocale: "",
-      // inputDateTimeFormat: "",
-      // outputDateFormat: "",
-      // outputDateTimeFormat: "",
-      // outputTimeFormat: "",
-      // outputTimezone: ""
-    //},
-
+    /**
+     * Credits
+     *
+     * You can customize following settings if you've provided valid license key.
+     * Otherwise they are ignored.
+     */
+    // credits: {
+    //   licenseKey: "",
+    //
+    //   enabled: true,
+    //   text: "",
+    //   url: "",
+    //   logoSrc: ""
+    // },
 
     /**
      * Default theme
@@ -32,18 +24,70 @@
      * To use additional themes you should include appropriate theme scripts to dashboard.
      * You can find all additional scripts here: https://www.anychart.com/download/cdn
      *
-     * For example, to be able to use the 'darkBlue' theme, you should include this script: https://cdn.anychart.com/releases/8.5.0/themes/dark_blue.min.js
+     * For example, to be able to use the 'darkBlue' theme
+     * you should include this script: https://cdn.anychart.com/releases/8.5.0/themes/dark_blue.min.js
      */
-     defaultTheme: "darkBlue"
+    // defaultTheme: "darkBlue",
+
+    // localization: {
+    //   inputLocale: "",
+    //   outputLocale: "",
+    //   inputDateTimeFormat: "",
+    //   outputDateFormat: "",
+    //   outputDateTimeFormat: "",
+    //   outputTimeFormat: "",
+    //   outputTimezone: ""
+    // }
   };
 
+  /**
+   * Global anychart object
+   */
   var acGlobal;
 
+  /**
+   * Hide settings fields that are supposed to be hidden
+   */
   (function() {
     freeboard.addStyle("#setting-row-chart_code", "display:none");
     freeboard.addStyle("#setting-row-editor_model", "display:none");
     freeboard.addStyle("#setting-row-widget_id", "display:none");
   })();
+
+
+  /**
+   * Creates from acConfig an array of default options for editor instance
+   * @return {Array}
+   */
+  var getDefaultOptions = function() {
+    var defaults = [];
+    if (acConfig.credits) {
+      for (var i in acConfig.credits) {
+        if (acConfig.credits.hasOwnProperty(i) && i !== 'licenseKey') {
+          if (typeof acConfig.credits[i] !== 'undefined')
+            defaults.push({'key': [['chart'], ['settings'], 'credits().'+ i +'()'], 'value': acConfig.credits[i]});
+        }
+      }
+    }
+    return defaults;
+  };
+
+  /**
+   * Applies settings from acConfig on a chart instance
+   * @param {Object} chart
+   */
+  var applyConfigOptions = function(chart) {
+    if (acConfig.credits) {
+      var chartCredits = chart['credits']();
+      for (var i in acConfig.credits) {
+        if (acConfig.credits.hasOwnProperty(i) && i !== 'licenseKey') {
+          if (typeof acConfig.credits[i] !== 'undefined')
+            chartCredits[i](acConfig.credits[i]);
+        }
+      }
+    }
+  };
+
 
   freeboard.loadWidgetPlugin({
     type_name: 'anychart_freeboard_plugin',
@@ -128,13 +172,18 @@
       }
 
       if (acConfig.credits && acConfig.credits.licenseKey) {
-        acGlobal.licenseKey(acConfig.credits.licenseKey);
+          acGlobal.licenseKey(acConfig.credits.licenseKey);
       }
 
       newInstanceCallback(new anychartWidget(settings));
     }
   });
 
+
+  /**
+   * Widget itself
+   * @param {Object} settings
+   */
   var anychartWidget = function(settings) {
     var self = this;
     var currentSettings = settings;
@@ -172,6 +221,8 @@
 
         if (!chart) return null;
 
+        applyConfigOptions(chart);
+
         // Invoke second part of code: pass data and apply chart appearance settings
         var code2func = eval(code2);
         code2func.apply(null, [chart, dataSet]);
@@ -185,6 +236,7 @@
       if (!editor) {
         editorOptions.run = false;
         editor = new acGlobal['chartEditor'];
+        editor['setDefaults'](getDefaultOptions());
         editor.deserializeModel(currentSettings.editor_model);
         editor.step('data', false);
         editor.step('export', false);
